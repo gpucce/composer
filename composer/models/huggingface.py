@@ -468,7 +468,7 @@ class HuggingFaceModel(ComposerModel):
 
         return metrics if metrics else {}
 
-    def update_metric(self, batch: Any, outputs: Any, metric: Metric) -> None:
+    def update_metric(self, batch: Any, outputs: Any, metric: Metric, output_path: bool=False, **kwargs) -> None:
         if isinstance(metric, InContextLearningQAAccuracy):
             assert self.labels is not None
             metric.update(batch=batch, outputs=outputs, labels=self.labels)  # pyright: ignore [reportGeneralTypeIssues]
@@ -477,6 +477,30 @@ class HuggingFaceModel(ComposerModel):
             metric.update(batch, outputs, self.labels)  # pyright: ignore [reportGeneralTypeIssues]
         else:
             metric.update(outputs, self.labels)  # pyright: ignore [reportGeneralTypeIssues]
+        
+        if output_path is not None and self.tokenizer is not None:
+            path = os.path.dirname(output_path)
+            if not os.path.exists(path):
+                os.mkdir(path)
+            print(batch)
+            print(outputs)
+            print(self.labels)
+            try:
+                with open(output_path, "a") as op:
+                    line = {"input": [],"output": []}
+                    for _input, idxs in zip(batch["input_ids"], batch["continuation_indices"]):
+                        line["input"].append(
+                            self.tokenizer.decode(_input[:idxs[0]]))
+                        line["output"].append(
+                            self.tokenizer.decode(_input[idxs]))
+
+                    # if self.labels is not None:
+                    #     line["labels"] = self.tokenizer.batch_decode(self.labels)
+
+                    op.write(json.dumps(line))
+                    op.write("\n")
+            except Exception as e:
+                print(f"Can't save outputs because of {e}")
 
     def get_metadata(self):
         model_output = {}

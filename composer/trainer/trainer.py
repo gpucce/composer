@@ -895,8 +895,12 @@ class Trainer:
 
         # compile config for PyTorch 2.0 or higher
         compile_config: Optional[Dict[str, Any]] = None,
+        move_to_device: bool = True,
+        data_output_path: Optional[str] = None, 
     ):
 
+        # Custom
+        self.data_output_path = data_output_path
         self.auto_log_hparams = auto_log_hparams
         self.python_log_level = python_log_level
         if self.python_log_level is not None:
@@ -995,7 +999,7 @@ class Trainer:
                 raise NotImplementedError(f'Only one optimizer is supported; found {num_optimizers} optimizers')
 
         # Move the model and optimizers to the device
-        if deepspeed_config is None and fsdp_config is None:
+        if deepspeed_config is None and fsdp_config is None and move_to_device:
             # check if model is already on tpu
             if isinstance(device, DeviceTPU) and 'xla' not in str(next(model.parameters()).device):
                 raise ValueError(
@@ -2181,6 +2185,7 @@ class Trainer:
                     device_batch,
                     eval_outputs,
                     metric,
+                    self.data_output_path
                 )
 
     def _run_evaluators(self, event: Event):
@@ -2921,10 +2926,16 @@ class Trainer:
                                     outputs = self.state.outputs
 
                                 for metric in metrics.values():
+                                    if self.data_output_path is not None:
+                                        data_output_path = self.data_output_path + f".{dist.get_global_rank()}"
+                                    else:
+                                        data_output_path = None
+                                    
                                     self._original_model.update_metric(
                                         self.state.batch,
                                         outputs,
                                         metric,
+                                        data_output_path
                                     )
 
                     except RuntimeError as e:

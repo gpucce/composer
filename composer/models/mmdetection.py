@@ -116,7 +116,7 @@ class MMDetModel(ComposerModel):
             metrics = self.val_metrics
         return metrics if metrics else {}
 
-    def update_metric(self, batch: Any, outputs: Any, metric: Metric):
+    def update_metric(self, batch: Any, outputs: Any, metric: Metric, **kwargs):
         targets_box = batch.pop('gt_bboxes')[0]
         targets_cls = batch.pop('gt_labels')[0]
         targets = []

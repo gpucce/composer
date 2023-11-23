@@ -185,6 +185,7 @@ class ComposerModel(torch.nn.Module, abc.ABC):
         batch: Any,
         outputs: Any,
         metric: Metric,
+        **kwargs
     ) -> None:
         """Update the given metric.
 

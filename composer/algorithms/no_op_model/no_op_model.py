@@ -65,7 +65,7 @@ class NoOpModelClass(ComposerModel):
         del x  # unused
         return y
 
-    def update_metric(self, batch: Any, outputs: Any, metric: Metric) -> None:
+    def update_metric(self, batch: Any, outputs: Any, metric: Metric, **kwargs) -> None:
         _, targets = batch
         metric.update(outputs, targets)
 

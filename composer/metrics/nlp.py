@@ -31,6 +31,7 @@ __all__ = [
     'LanguagePerplexity',
     'InContextLearningLMExpectedCalibrationError',
     'InContextLearningMCExpectedCalibrationError',
+    'ItaInContextLearningLMAccuracy',
 ]
 
 

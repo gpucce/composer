@@ -117,7 +117,7 @@ class ComposerClassifier(ComposerModel):
 
         return metrics_dict
 
-    def update_metric(self, batch: Any, outputs: Any, metric: Metric) -> None:
+    def update_metric(self, batch: Any, outputs: Any, metric: Metric, **kwargs) -> None:
         _, targets = batch
         metric.update(outputs, targets)
 
